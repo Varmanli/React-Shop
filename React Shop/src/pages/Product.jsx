@@ -1,23 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import React from "react";
-import ProductList from "../../UI/ProductList";
-import Category from "../../UI/Category";
+import React, { useContext } from "react";
+import { ContextProvider } from "../feature/context/Context";
 
-function MensClothingProducts() {
+import ProductUI from "../UI/ProductUI";
+
+function Product() {
+  const { productId } = useContext(ContextProvider);
   const {
     isLoading,
     data: Product,
     error,
   } = useQuery({
-    queryKey: ["MenClothing"],
+    queryKey: ["Product"],
     queryFn: async function () {
       const data = await axios.get(
-        "https://fakestoreapi.com/products/category/men's%20clothing"
+        `https://fakestoreapi.com/products/${productId}`
       );
       return data.data;
     },
   });
+
   if (isLoading) {
     return (
       <button
@@ -46,22 +49,20 @@ function MensClothingProducts() {
     );
   }
   return (
-    <div className="flex flex-col lg:flex-row-reverse ">
-      <Category />
-      <div className=" lg:grid lg:grid-cols-3 md:grid-cols-2 lg:w-[80%]">
-        {Product?.map((product) => (
-          <ProductList
-            title={product?.title}
-            category={product?.category}
-            price={product?.price}
-            image={product?.image}
-            id={product?.id}
-            key={product?.id}
-          />
-        ))}
-      </div>
-    </div>
+    <>
+      {[Product]?.map((product) => (
+        <ProductUI
+          title={product?.title}
+          price={product?.price}
+          image={product?.image}
+          des={product?.description}
+          category={product?.category}
+          key={product?.id}
+          id={product?.id}
+        />
+      ))}
+    </>
   );
 }
 
-export default MensClothingProducts;
+export default Product;

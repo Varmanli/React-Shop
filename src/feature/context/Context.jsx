@@ -1,65 +1,64 @@
-import { data } from "autoprefixer";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 
 export const ContextProvider = createContext();
 
 function Context({ children }) {
   const [productId, setProductId] = useState();
   const [cartItems, setCartItems] = useState([]);
-  // useEffect(() => {
-  //   const data = localStorage.getItem("Shoping-Cart");
-  //   setCartItems(!JSON.parse(data) ? JSON.parse(data) : []);
-  // }, []);
-  // useEffect(() => {
-  //   if (cartItems !== undefined) {
-  //     const data = localStorage.setItem(
-  //       "Shoping-Cart",
-  //       JSON.stringify(cartItems)
-  //     );
-  //   }
-  // }, [cartItems]);
+
+  // بازیابی سبد خرید از localStorage در بارگذاری اولیه
+  useEffect(() => {
+    const storedCartItems = localStorage.getItem("cartItems");
+    if (storedCartItems) {
+      setCartItems(JSON.parse(storedCartItems));
+    }
+  }, []);
+
+  // ذخیره سبد خرید در localStorage هر بار که cartItems تغییر کند
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    }
+  }, [cartItems]);
+
+  // افزودن محصول به سبد خرید
   function addToCart(id, title, price, image) {
-    if (!cartItems?.find((item) => item.id === id)) {
-      setCartItems([
-        ...cartItems,
+    setCartItems((prevItems) => {
+      const existingItem = prevItems.find((item) => item.id === id);
+      if (existingItem) {
+        return prevItems.map((item) =>
+          item.id === id ? { ...item, count: item.count + 1 } : item
+        );
+      }
+      return [
+        ...prevItems,
         {
-          id: id,
+          id,
           count: 1,
-          title: title,
-          image: image,
-          price: price,
+          title,
+          image,
+          price,
         },
-      ]);
-    } else
-      setCartItems(
-        cartItems?.map((item) => {
-          if (item.id === id) {
-            return {
-              ...item,
-              count: item.count + 1,
-            };
-          } else return item;
-        })
-      );
-    console.log(cartItems);
+      ];
+    });
   }
 
+  // حذف محصول از سبد خرید یا کاهش تعداد
   function removeFromCart(id) {
-    setCartItems(
-      cartItems.map((item) => {
-        if (item.id === id) {
-          return {
-            ...item,
-            count: item.count === 0 ? 0 : item.count - 1,
-          };
-        } else return item;
-      })
+    setCartItems((prevItems) =>
+      prevItems
+        .map((item) =>
+          item.id === id ? { ...item, count: item.count - 1 } : item
+        )
+        .filter((item) => item.count > 0)
     );
   }
 
+  // ذخیره id محصول انتخابی
   function productIdHandler(id) {
-    return setProductId(id);
+    setProductId(id);
   }
+
   const value = {
     productId,
     setProductId: productIdHandler,
