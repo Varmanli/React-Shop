@@ -38,9 +38,7 @@ function App() {
             <Route path="/ShoppingCart" element={<ShoppingCart />} />
             <Route path="About" element={<About />} />
           </Routes>
-
           <Footer />
-          <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       </Context>
     </BrowserRouter>
